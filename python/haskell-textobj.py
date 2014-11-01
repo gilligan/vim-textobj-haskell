@@ -24,12 +24,38 @@ def setRetValue(start, end,  lines):
     endPos = [0, end+1, len(lines[end]), 0]
     vim.command("let g:haskell_textobj_ret="+str([startPos, endPos]))
 
-def selectHaskellBinding(lines, cursor, includeType):
+def selectAHaskellBinding(lines, cursor, includeType):
     """
     Extract function binding from index in content
     content: [String] list of haskell source lines
     cursor:  zero-based line index
-    return:  [String] top level binding index resides in
+    includeType: include type or not
+    """
+    backward = lambda x : x - 1
+    forward  = lambda x : x + 1
+    notTopBinding = lambda line : len(line) == 0 or (line.startswith("--")) or line[0].isspace()
+    index = cursor - 1
+
+    bStart, bEnd = selectIHaskellBinding(lines, cursor, includeType)
+    foundFirst, firstBinding = find(lines, bStart, notTopBinding, backward)
+    foundLast, lastBinding = find(lines, bEnd, notTopBinding, forward)
+
+    if foundFirst:
+        bStart = firstBinding + 1
+        bStart = bStart+1 if isTypeSignature(lines[bStart]) else bStart
+    if foundLast:
+        bEnd = lastBinding
+
+    setRetValue(bStart, bEnd, lines)
+
+
+
+def selectIHaskellBinding(lines, cursor, includeType):
+    """
+    Extract function binding from index in content
+    lines:   [String] list of haskell source lines
+    cursor:  zero-based line index
+    includeType: include type or not
     """
     backward = lambda x : x - 1
     forward  = lambda x : x + 1
@@ -44,3 +70,4 @@ def selectHaskellBinding(lines, cursor, includeType):
         bStart = bStart - 1
 
     setRetValue(bStart, bEnd, lines)
+    return (bStart, bEnd)

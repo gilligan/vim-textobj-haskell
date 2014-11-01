@@ -21,6 +21,7 @@ execute 'pyfile ' . g:haskell_textobj_path
 call textobj#user#plugin('haskell', {
       \ '-': {
       \     'select-i': 'ih', '*select-i-function*': 'textobj#haskell#select_i',
+      \     'select-a': 'ah', '*select-a-function*': 'textobj#haskell#select_a',
       \ },
     \})
 
